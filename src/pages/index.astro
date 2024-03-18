@@ -1,0 +1,31 @@
+---
+import { Comment, db } from 'astro:db'
+
+const comments = await db
+  .select()
+  .from(Comment)
+  .innerJoin(Author, eq(Comment.authorId, Author.id))
+
+if (Astro.request.method === 'POST') {
+  // parse form data
+  const formData = await Astro.request.formData()
+  const author = formData.get('author')
+  const content = formData.get('content')
+  if (typeof author === 'string' && typeof content === 'string') {
+    // insert form data into the Comment table
+    await db.insert(Comment).values({ author, content })
+  }
+}
+---
+
+<form method='POST' style='display: grid'>
+  <label for='author'>Author</label>
+  <input id='author' name='author' />
+
+  <label for='content'>Content</label>
+  <textarea id='content' name='content'></textarea>
+
+  <button type='submit'>Submit</button>
+</form>
+
+<!--render `comments`-->
